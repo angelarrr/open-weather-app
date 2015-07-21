@@ -1,9 +1,9 @@
-angular.module('OWMApp', ['ngRoute'])
+angular.module('OWMApp', ['ngRoute', 'ngAnimate'])
 	.value('owmCities', ['New York', 'Dallas', 'Chicago'])
 	.config(function($routeProvider){
 		$routeProvider.when('/', {
 			templateUrl : 'home.html',
-			controller : 'HomeCtrl'
+			controller : 'HomeCtrl as home'
 		}).when('/cities/:city', {
 			templateUrl : 'city.html',
 			controller : 'CityCtrl',
@@ -19,16 +19,26 @@ angular.module('OWMApp', ['ngRoute'])
 			}
 		}).when('/error', {
 			template: '<p>Error - Page Not Found</p>'
+		}).otherwise({
+			redirectTo: '/error'
 		});
 	})
-	.run(function($rootScope, $location){
+	.run(function($rootScope, $location, $timeout){
 		$rootScope.$on('$routeChangeError', function() {
 			$location.path('/error');
 		});
+		$rootScope.$on('$routeChangeStart', function() {
+			$rootScope.isLoading = true;
+		});
+		$rootScope.$on('$routeChangeSuccess', function() {
+			$timeout(function() {
+				$rootScope.isLoading = false;
+			}, 1000);
+		});
 	})
-	.controller('HomeCtrl', ['$scope', function($scope){
-		// empty for now
-	}])
+	.controller('HomeCtrl', function($scope){
+		this.welcomeMessage = "Welcome Home";
+	})
 	.controller('CityCtrl', function($scope, city){
 		$scope.city = city;
 	});
